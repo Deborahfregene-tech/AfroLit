@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AFRO•LIT — Interactive Literary Cartography</title>
+    <!-- Google Fonts with full Nigerian/African tonal & underdot support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- TOP NAVIGATION HEADER -->
+    <header class="top-bar">
+      <div class="brand" onclick="switchView('home')">
+        AFRO<span class="dot">•</span>LIT
+      </div>
+
+      <nav class="nav-links">
+        <button
+          class="nav-btn active"
+          data-view="home"
+          onclick="switchView('home')"
+          data-i18n="navExplore"
+        >
+          Explore Map
+        </button>
+        <button
+          class="nav-btn"
+          data-view="reader"
+          onclick="switchView('reader')"
+          data-i18n="navReader"
+        >
+          Community Reader
+        </button>
+        <button
+          class="nav-btn"
+          data-view="profile"
+          onclick="switchView('profile')"
+          data-i18n="navProfile"
+        >
+          Your Story
+        </button>
+      </nav>
+
+      <!-- UI Indigenous Language Switcher (From Wireframe Bottom Bar) -->
+      <div class="lang-control">
+        <label for="ui-lang" class="sr-only">Switch Language</label>
+        <select id="ui-lang" onchange="changeUILanguage(this.value)">
+          <option value="en">UI: English</option>
+          <option value="yo">Èdè: Yorùbá</option>
+          <option value="ig">Asụsụ: Ìgbò</option>
+          <option value="ha">Harshe: Hausa</option>
+          <option value="tw">Kasa: Twi</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- =========================================================
+       SCREEN 1 & 2: HOMEPAGE + INTERACTIVE MAP + BOOK DETAIL
+       ========================================================= -->
+    <main id="view-home" class="view active">
+      <div class="split-layout">
+        <!-- LEFT COLUMN: "WHERE DO YOU WANT TO GO?" MAP -->
+        <section class="map-panel">
+          <p class="eyebrow" data-i18n="whereToGo">WHERE DO YOU WANT TO GO?</p>
+          <p class="map-hint" data-i18n="mapHint">
+            Select a literary region on the map to explore stories.
+          </p>
+
+          <div class="africa-map-wrapper">
+            <!-- Stylized Interactive SVG Map of Africa -->
+            <svg
+              viewBox="0 0 420 460"
+              class="africa-svg"
+              role="img"
+              aria-label="Interactive Map of African Literature"
+            >
+              <!-- Base Continent Silhouette -->
+              <path
+                class="continent-base"
+                d="M135,30 L215,28 L265,55 L295,105 L345,145 L335,195 L305,235 L295,300 L265,375 L220,425 L190,420 L170,350 L155,275 L125,225 L65,215 L35,175 L45,115 L90,65 Z"
+              />
+
+              <!-- Clickable Region: West Africa (Nigeria, Ghana, Togo, Senegal) -->
+              <g
+                class="map-region active-region"
+                id="region-west"
+                onclick="selectRegion('west')"
+              >
+                <path
+                  d="M55,155 L145,150 L165,205 L125,225 L65,215 L38,180 Z"
+                />
+                <circle cx="122" cy="192" r="7" class="pin-pulse" />
+                <text x="68" y="188" class="region-label">West Africa</text>
+              </g>
+
+              <!-- Clickable Region: East Africa (Kenya, Ethiopia, Tanzania) -->
+              <g
+                class="map-region"
+                id="region-east"
+                onclick="selectRegion('east')"
+              >
+                <path d="M255,145 L342,150 L330,220 L275,245 L245,200 Z" />
+                <circle cx="295" cy="195" r="7" class="pin-pulse" />
+                <text x="262" y="182" class="region-label">East Africa</text>
+              </g>
+
+              <!-- Clickable Region: Southern Africa (Zimbabwe, South Africa) -->
+              <g
+                class="map-region"
+                id="region-south"
+                onclick="selectRegion('south')"
+              >
+                <path d="M175,285 L275,280 L260,375 L215,422 L185,370 Z" />
+                <circle cx="225" cy="340" r="7" class="pin-pulse" />
+                <text x="188" y="325" class="region-label">
+                  Southern Africa
+                </text>
+              </g>
+
+              <!-- Clickable Region: North Africa -->
+              <g
+                class="map-region"
+                id="region-north"
+                onclick="selectRegion('north')"
+              >
+                <path d="M90,65 L215,32 L265,65 L250,130 L100,135 Z" />
+                <circle cx="175" cy="85" r="7" class="pin-pulse" />
+                <text x="140" y="108" class="region-label">North Africa</text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Region Filter Pills -->
+          <div class="region-pills">
+            <button class="pill active" onclick="selectRegion('all')">
+              All Regions
+            </button>
+            <button class="pill" onclick="selectRegion('west')">
+              Nigeria / Ghana / Togo
+            </button>
+            <button class="pill" onclick="selectRegion('east')">
+              Kenya / Ethiopia
+            </button>
+            <button class="pill" onclick="selectRegion('south')">
+              Zimbabwe / SA
+            </button>
+          </div>
+        </section>
+
+        <!-- RIGHT COLUMN: BROWSE SHELF & SELECTED BOOK SPOTLIGHT (SCREEN 1 & 2) -->
+        <section class="content-panel">
+          <div class="section-header">
+            <h2 id="region-heading" data-i18n="browseHeading">
+              BROWSE AUTHENTIC AFRICAN STORIES
+            </h2>
+            <span class="region-badge" id="active-location-badge"
+              >LAGOS & ENUGU, NIGERIA</span
+            >
+          </div>
+
+          <!-- Book Grid (Screen 1) -->
+          <div class="book-grid" id="book-grid">
+            <!-- Populated dynamically by script.js -->
+          </div>
+
+          <!-- Selected Book Spotlight Card (Screen 2: Cover + Author Phonetics + Read CTA) -->
+          <div class="book-spotlight" id="book-spotlight">
+            <div class="spotlight-cover" id="spot-cover">
+              <span class="cover-tag" id="spot-tribe">IGBO / NIGERIAN</span>
+              <h3 id="spot-cover-title">THE MIDDLE DAUGHTER</h3>
+              <p id="spot-cover-author">Chika Unigwe</p>
+            </div>
+
+            <div class="spotlight-details">
+              <div class="location-tag" id="spot-location">
+                LAGOS, NIGERIA • IGBO HERITAGE
+              </div>
+              <h2 id="spot-title">The Middle Daughter</h2>
+
+              <!-- Author Name + Phonetic Breakdown Button (From Screen 2) -->
+              <div class="author-row">
+                <span class="author-name" id="spot-author">Chika Unigwe</span>
+                <button
+                  class="phonetic-btn"
+                  onclick="togglePhoneticCard()"
+                  title="Hear & view phonetic pronunciation"
+                >
+                  🔊 <span data-i18n="pronounceBtn">Pronounce Name</span>
+                </button>
+              </div>
+
+              <!-- Interactive Phonetic Breakdown Card -->
+              <div class="phonetic-card" id="phonetic-card">
+                <div class="phonetic-top">
+                  <strong id="phonetic-syllables">CHEE-kah oo-NEE-gway</strong>
+                  <button class="play-audio-mini" onclick="speakAuthorName()">
+                    ▶ Listen
+                  </button>
+                </div>
+                <p class="phonetic-tones" id="phonetic-tones">
+                  Tone Guide: High – Low | Low – High – Mid (Igbo)
+                </p>
+                <p class="phonetic-meaning" id="phonetic-meaning">
+                  <strong>Meaning:</strong> "Chika" (Chukwuka) means
+                  <em>"God is supreme"</em> in Igbo.
+                </p>
+              </div>
+
+              <p class="spot-synopsis" id="spot-synopsis">
+                A poignant modern retelling of the Hades and Persephone myth set
+                in Enugu and Lagos, exploring sisterhood, grief, and resilience
+                across Nigerian family life.
+              </p>
+
+              <div class="spotlight-actions">
+                <button
+                  class="primary-btn"
+                  onclick="openBookInReader()"
+                  data-i18n="readNowBtn"
+                >
+                  READ IN COMMUNITY MODE →
+                </button>
+                <button class="secondary-btn" onclick="addToWantToRead()">
+                  + Want to Read
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- =========================================================
+       SCREEN 3: COMMUNITY MODE READING + TRANSLATION + SOUNDSCAPES
+       ========================================================= -->
+    <main id="view-reader" class="view">
+      <div class="reader-toolbar">
+        <div class="reader-book-meta">
+          <button class="back-link" onclick="switchView('home')">← Map</button>
+          <span class="divider">|</span>
+          <strong id="reader-book-title"
+            >The Middle Daughter — Chika Unigwe</strong
+          >
+        </div>
+
+        <!-- Reader Controls (Font size, Dual Language, Ambient Soundscape) -->
+        <div class="reader-controls">
+          <button
+            class="tool-pill"
+            id="toggle-community-btn"
+            onclick="toggleCommunityHighlights()"
+          >
+            💬 Community Highlights: ON
+          </button>
+          <button
+            class="tool-pill"
+            id="toggle-bilingual-btn"
+            onclick="toggleBilingualMode()"
+          >
+            🌍 Dual-Language View
+          </button>
+          <div class="soundscape-box">
+            <label for="soundscape-select">🎧 Atmosphere:</label>
+            <select
+              id="soundscape-select"
+              onchange="changeSoundscape(this.value)"
+            >
+              <option value="off">Silent Reading</option>
+              <option value="rain">Lagos Evening Rain</option>
+              <option value="market">Onitsha / Makola Market Hum</option>
+              <option value="drums">Talking Drums & Kora Pulse</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="reader-workspace">
+        <!-- LEFT: BOOK READING CANVAS -->
+        <article class="reading-page" id="reading-page">
+          <div class="chapter-header">
+            <span class="chapter-eyebrow">CHAPTER ONE • COMMUNITY MODE</span>
+            <h1 id="reader-chapter-title">The Fabric of Memory</h1>
+          </div>
+
+          <div class="prose-body" id="prose-body">
+            <p>
+              On the morning of the celebration, the compound smelled of fried
+              plantains, woodsmoke, and fresh starch. Udodi stood by the veranda
+              watching her aunties unpack bolts of matching
+              <mark
+                class="native-word active-word"
+                data-word="asoebi"
+                onclick="selectNativeWord('asoebi')"
+                >aṣọ-ẹbí</mark
+              >
+              carefully folded in brown paper.
+            </p>
+            <p class="bilingual-translation hidden">
+              <em>[Yorùbá / Igbo Parallel]:</em> Ní òwúrọ̀ ayẹyẹ náà, agbo ilé
+              náà kún fún òórùn dòdò àti aṣọ-ẹbí tuntun tí wọ́n fi ṣe àṣà ìṣọ̀kan
+              ẹbí.
+            </p>
+
+            <p>
+              "Do not stand there looking like an
+              <mark
+                class="native-word"
+                data-word="oyinbo"
+                onclick="selectNativeWord('oyinbo')"
+                >òyìnbó</mark
+              >
+              visitor," her mother laughed, tying her headwrap with practiced
+              speed. "Bring the kola nuts and greet your elders properly—<mark
+                class="native-word"
+                data-word="nnoo"
+                onclick="selectNativeWord('nnoo')"
+                >nnọ́ọ̀</mark
+              >, welcome home."
+            </p>
+            <p class="bilingual-translation hidden">
+              <em>[Igbo Parallel]:</em> "Eguzola ebe ahụ dị ka onye ọbịa. Weta
+              ọjị ka i kelee ndị okenye gị—nnọ́ọ̀, nnabata n'ụlọ."
+            </p>
+
+            <p>
+              Across the courtyard, someone tuned a radio to highlife music, and
+              the rhythm carried over the red laterite wall into the warm
+              afternoon air, binding every voice in the neighborhood into a
+              single
+              <mark
+                class="native-word"
+                data-word="ubuntu"
+                onclick="selectNativeWord('ubuntu')"
+                >ubuntu</mark
+              >
+              chorus.
+            </p>
+            <p class="bilingual-translation hidden">
+              <em>[Cultural Note]:</em> Highlife guitars and talking rhythms
+              echo across West African courtyards, grounding the narrative in
+              communal belonging.
+            </p>
+          </div>
+        </article>
+
+        <!-- RIGHT: TRANSLATION & COMMUNITY COMMENTS DRAWER (SCREEN 3) -->
+        <aside class="community-sidebar">
+          <!-- Top Box: Native Word Translation Card (e.g., "aseobi — Yoruba word") -->
+          <div class="translation-card">
+            <div class="card-header-row">
+              <span class="badge-native" id="word-origin">YORÙBÁ WORD</span>
+              <button class="play-audio-mini" onclick="speakNativeWord()">
+                🔊 Hear Word
+              </button>
+            </div>
+            <h2 id="word-title">Aṣọ-ẹbí</h2>
+            <p class="word-phonetic" id="word-phonetic">
+              /ah-SHAW eh-BEE/ • Literal: "Family Cloth"
+            </p>
+            <p class="word-definition" id="word-definition">
+              A traditional Nigerian practice where family members, friends, and
+              community wear matching fabrics at weddings, funerals, and
+              festivals to show solidarity and shared identity.
+            </p>
+          </div>
+
+          <!-- Bottom Box: Community Comments on Highlighted Text -->
+          <div class="comments-card">
+            <h3>COMMUNITY COMMENTS <span id="comment-count">(3)</span></h3>
+            <div class="comment-list" id="comment-list">
+              <div class="comment-item">
+                <strong>@amaka_reads</strong>
+                <p>
+                  In my family, picking the aṣọ-ẹbí lace months before a wedding
+                  is an entire event on its own!
+                </p>
+              </div>
+              <div class="comment-item">
+                <strong>@tunde_lagos</strong>
+                <p>
+                  Love that the tonal marks (ṣ and ẹ) are printed properly
+                  here—most Western e-readers turn them into boxes.
+                </p>
+              </div>
+            </div>
+
+            <form class="comment-form" onsubmit="postCommunityComment(event)">
+              <input
+                type="text"
+                id="new-comment-input"
+                placeholder="Add a reflection on this passage..."
+                required
+              />
+              <button type="submit">Post</button>
+            </form>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <!-- =========================================================
+       SCREEN 4: USER PROFILE ("YOUR STORY")
+       ========================================================= -->
+    <main id="view-profile" class="view">
+      <section class="profile-container">
+        <h1 class="profile-heading" data-i18n="yourStoryHeading">YOUR STORY</h1>
+
+        <div class="avatar-circle">
+          <span>AL</span>
+        </div>
+        <p class="username-handle">@diaspora_reader</p>
+
+        <!-- 3 Key Stats from Sketchbook Screen 4 -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-label" data-i18n="booksReadLabel"
+              >BOOKS READ</span
+            >
+            <span class="stat-number" id="stat-read">10</span>
+          </div>
+
+          <div class="stat-box">
+            <span class="stat-label" data-i18n="wantToReadLabel"
+              >WANT TO READ</span
+            >
+            <span class="stat-number" id="stat-want">15</span>
+          </div>
+
+          <div class="stat-box">
+            <span class="stat-label" data-i18n="readsMostlyLabel"
+              >READS MOSTLY FROM...</span
+            >
+            <span class="stat-place" id="stat-place">TOGO & NIGERIA</span>
+          </div>
+        </div>
+
+        <!-- Recent Literary Journey Shelf -->
+        <div class="profile-shelf">
+          <h3>RECENTLY EXPLORED REGIONS & TITLES</h3>
+          <div class="shelf-tags">
+            <span class="shelf-chip"
+              >🇳🇬 Half of a Yellow Sun — Chimamanda Ngozi Adichie</span
+            >
+            <span class="shelf-chip"
+              >🇹🇬 An Orchestra of Minorities — Chigozie Obioma</span
+            >
+            <span class="shelf-chip">🇬🇭 Homegoing — Yaa Gyasi</span>
+            <span class="shelf-chip"
+              >🇿🇼 Nervous Conditions — Tsitsi Dangarembga</span
+            >
+            <span class="shelf-chip">🇸🇳 So Long a Letter — Mariama Bâ</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
